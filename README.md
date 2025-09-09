@@ -1,61 +1,150 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🧩 Design Pattern: Singleton in Laravel
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+این پروژه یک مثال ساده از **الگوی طراحی Singleton** در فریمورک لاراول است.  
+هدف این است که نشان دهیم چطور می‌توانیم مطمئن شویم فقط **یک نمونه (Instance)** از یک کلاس ساخته می‌شود و همه جا از همان نمونه استفاده می‌کنیم.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 📖 توضیح الگو
+الگوی **Singleton** تضمین می‌کند که:
+1. فقط یک نمونه از کلاس ساخته شود.
+2. همه قسمت‌های برنامه از همان نمونه استفاده کنند.
+3. جلوی ساخت نمونه‌های جدید یا کپی شدن کلاس گرفته شود.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+در لاراول، برای مثال می‌توان از Singleton برای:
+- **مدیریت تنظیمات سایت (Site Config)**
+- **Logger ها**
+- **Cache Manager**
+- یا هر جایی که باید یک نمونه واحد داشته باشیم استفاده کرد.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## 🛠️ پیاده‌سازی
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 1. کلاس Singleton
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+`app/Services/SiteConfig.php`
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```php
+<?php
 
-## Laravel Sponsors
+namespace App\Services;
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+class SiteConfig
+{
+    private static $instance = null;
 
-### Premium Partners
+    public $settings = [];
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+    private function __construct()
+    {
+        $this->settings = [
+            'site_name' => 'My Laravel App',
+            'maintenance_mode' => false,
+        ];
+    }
 
-## Contributing
+    private function __clone() {}
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+    public static function getInstance(): SiteConfig
+    {
+        if (self::$instance === null) {
+            self::$instance = new SiteConfig();
+        }
+        return self::$instance;
+    }
 
-## Code of Conduct
+    public function get($key, $default = null)
+    {
+        return $this->settings[$key] ?? $default;
+    }
+}
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
-## Security Vulnerabilities
+### 2. استفاده در کنترلر
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+`app/Http/Controllers/HomeController.php`
 
-## License
+```php
+<?php
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+namespace App\Http\Controllers;
+
+use App\Services\SiteConfig;
+
+class HomeController extends Controller
+{
+    public function index()
+    {
+        $config = SiteConfig::getInstance();
+
+        return response()->json([
+            'site_name' => $config->get('site_name'),
+            'maintenance' => $config->get('maintenance_mode'),
+        ]);
+    }
+}
+```
+
+
+### 3. تعریف Route
+`routes/web.php`
+
+```php
+use App\Http\Controllers\HomeController;
+
+Route::get('/test-singleton', [HomeController::class, 'index']);
+```
+
+
+### حالا با اجرای آدرس زیر در مرورگر:
+`http://localhost:8000/test-singleton`
+
+
+
+### خروجی زیر را دریافت می‌کنید:
+```php
+{
+    "site_name": "My Laravel App",
+    "maintenance": false
+}
+```
+
+
+###  4. تست واحد (Feature Test)
+
+`tests/Feature/SingletonTest.php`
+
+```php
+<?php
+
+namespace Tests\Feature;
+
+use App\Services\SiteConfig;
+use Tests\TestCase;
+
+class SingletonTest extends TestCase
+{
+    public function test_singleton_returns_same_instance()
+    {
+        $first = SiteConfig::getInstance();
+        $second = SiteConfig::getInstance();
+
+        $this->assertSame($first, $second);
+    }
+}
+```
+
+###  اجرای تست:
+`php artisan test --filter=SingletonTest`
+
+
+<div dir="rtl">
+
+###  ✅ نکات کلیدی
+- با private __construct() مانع ساخت مستقیم شیء جدید می‌شویم.
+- با private __clone() مانع کپی کردن آبجکت می‌شویم.
+- با static getInstance() همیشه یک نمونه ثابت داریم.
+- در لاراول می‌توان همین مفهوم را با Service Container و متد app()->singleton() هم پیاده‌سازی کرد.
+</div>
