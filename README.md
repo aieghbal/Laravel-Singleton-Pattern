@@ -149,4 +149,4 @@ class SingletonTest extends TestCase
 </div>
 
 
-[Persian version](./README.md)
+[Persian version](./README.fa.md)
