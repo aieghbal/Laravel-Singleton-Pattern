@@ -1,27 +1,26 @@
 # 🧩 Design Pattern: Singleton in Laravel
-
-این پروژه یک مثال ساده از **الگوی طراحی Singleton** در فریمورک لاراول است.  
-هدف این است که نشان دهیم چطور می‌توانیم مطمئن شویم فقط **یک نمونه (Instance)** از یک کلاس ساخته می‌شود و همه جا از همان نمونه استفاده می‌کنیم.
+This project is a simple example of the Singleton design pattern in the Laravel framework.
+The goal is to show how we can ensure that only one instance of a class is created and that the same instance is used everywhere.
 
 ---
 
-## 📖 توضیح الگو
-الگوی **Singleton** تضمین می‌کند که:
-1. فقط یک نمونه از کلاس ساخته شود.
-2. همه قسمت‌های برنامه از همان نمونه استفاده کنند.
-3. جلوی ساخت نمونه‌های جدید یا کپی شدن کلاس گرفته شود.
+## 📖 Pattern Explanation
+The Singleton pattern guarantees that:
+1. Only one instance of the class is created.
+2. All parts of the program use the same instance.
+3. No new instances or copies of the class can be created.
 
-در لاراول، برای مثال می‌توان از Singleton برای:
-- **مدیریت تنظیمات سایت (Site Config)**
-- **Logger ها**
+In Laravel, Singletons can be useful for:
+- **Site configuration management**
+- **Loggers**
 - **Cache Manager**
-- یا هر جایی که باید یک نمونه واحد داشته باشیم استفاده کرد.
+- Or anywhere a single instance is required.
 
 ---
 
-## 🛠️ پیاده‌سازی
+## 🛠️ Implementation
 
-### 1. کلاس Singleton
+### 1. Singleton Class
 
 `app/Services/SiteConfig.php`
 
@@ -62,7 +61,7 @@ class SiteConfig
 ```
 
 
-### 2. استفاده در کنترلر
+### 2. Using the Singleton in a Controller
 
 `app/Http/Controllers/HomeController.php`
 
@@ -88,7 +87,7 @@ class HomeController extends Controller
 ```
 
 
-### 3. تعریف Route
+### 3. Define Route
 `routes/web.php`
 
 ```php
@@ -98,12 +97,12 @@ Route::get('/test-singleton', [HomeController::class, 'index']);
 ```
 
 
-### حالا با اجرای آدرس زیر در مرورگر:
+### Visit in Browser
 `http://localhost:8000/test-singleton`
 
 
 
-### خروجی زیر را دریافت می‌کنید:
+### Output
 ```php
 {
     "site_name": "My Laravel App",
@@ -112,7 +111,7 @@ Route::get('/test-singleton', [HomeController::class, 'index']);
 ```
 
 
-###  4. تست واحد (Feature Test)
+###  4. Unit Test (Feature Test)
 
 `tests/Feature/SingletonTest.php`
 
@@ -136,15 +135,18 @@ class SingletonTest extends TestCase
 }
 ```
 
-###  اجرای تست:
+###  Run the test:
 `php artisan test --filter=SingletonTest`
 
 
 <div dir="rtl">
 
-###  ✅ نکات کلیدی
-- با private __construct() مانع ساخت مستقیم شیء جدید می‌شویم.
-- با private __clone() مانع کپی کردن آبجکت می‌شویم.
-- با static getInstance() همیشه یک نمونه ثابت داریم.
-- در لاراول می‌توان همین مفهوم را با Service Container و متد app()->singleton() هم پیاده‌سازی کرد.
+###  ✅ Key Points
+- Using private __construct() prevents direct instantiation.
+- Using private __clone() prevents object cloning.
+- Using static getInstance() ensures a single fixed instance.
+- In Laravel, you can implement the same concept via the Service Container using app()->singleton().
 </div>
+
+
+[Persian version](./README.md)
